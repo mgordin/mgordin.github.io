@@ -284,10 +284,10 @@ var data = {
     }
 }
 
-let tryData = loadData(saveName)
+/* let tryData = loadData(saveName)
 if (tryData != null) {
     data = tryData
-}
+} */
 
 probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
 
