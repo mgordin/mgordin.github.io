@@ -284,10 +284,13 @@ var data = {
     }
 }
 
-/* let tryData = loadData(saveName)
+let tryData = loadData(saveName)
 if (tryData != null) {
+    console.log("Gonna overwrite this stuff, yeah")
     data = tryData
-} */
+} else {
+    console.log("nop")
+}
 
 probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
 
