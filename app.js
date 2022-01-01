@@ -134,7 +134,6 @@ function sumStuffDown(prob, target) {
 // Test it out
 
 function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
-    //console.log('running: ', running)
     var allResults = [];
     var bag = makeBag(tokens);
     console.log("abilityEffects in run(): ", abilityEffects);
@@ -146,7 +145,7 @@ function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
     return cumulative
 }
 
-function probabilityPlot(p) {
+async function probabilityPlot(p) {
     xValue = range(-2, 5);
     yValue = [
         Math.round(p[-2]),
@@ -281,6 +280,163 @@ var data = {
             'tablet': ['a', 2],
             'elderThing': ['a', 2]
         }
+    },
+    campaignOptions: [
+        { text: "Custom", value: "custom" },
+        { text: "Night of the Zealot (Standard)", value: "notz_s" },
+        { text: "The Dunwich Legacy (Standard)", value: "dl_s" },
+        { text: "The Path to Carcosa (Standard)", value: "ptc_s" },
+        { text: "The Forgotten Age (Standard)", value: "fa_s" },
+        { text: "The Circle Undone (Standard)", value: "cu_s" },
+        { text: "The Dream-Eaters (A) (Standard)", value: "dea_s" },
+        { text: "The Dream-Eaters (B) (Standard)", value: "deb_s" },
+        { text: "Edge of the Earth (Standard)", value: "eote_s" }
+    ],
+    campaignTokenSets: {
+        "notz_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [3, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [1, -2, false, null],
+            'tablet': [1, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "dl_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [3, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [1, -2, false, null],
+            'tablet': [0, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "ptc_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [3, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [3, -2, false, null],
+            'cultist': [0, -2, false, null],
+            'tablet': [0, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "fa_s": {
+            '+1': [1, 1, false, null],
+            '0': [3, 0, false, null],
+            '-1': [1, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [0, -4, false, null],
+            '-5': [1, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [0, -2, false, null],
+            'tablet': [0, -3, false, null],
+            'elderThing': [1, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "cu_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [2, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [0, -2, false, null],
+            'tablet': [0, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "dea_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [2, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [0, -2, false, null],
+            'cultist': [1, -2, false, null],
+            'tablet': [2, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "deb_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [3, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [1, -2, false, null],
+            'tablet': [0, -3, false, null],
+            'elderThing': [2, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [0, -1, true, 'frost']
+        },
+        "eote_s": {
+            '+1': [1, 1, false, null],
+            '0': [2, 0, false, null],
+            '-1': [3, -1, false, null],
+            '-2': [2, -2, false, null],
+            '-3': [1, -3, false, null],
+            '-4': [1, -4, false, null],
+            '-5': [0, -5, false, null],
+            'skull': [2, -2, false, null],
+            'cultist': [1, -2, false, null],
+            'tablet': [1, -3, false, null],
+            'elderThing': [0, -4, false, null],
+            'star': [1, 1, false, null],
+            'autofail': [1, -999, false, null],
+            'bless': [0, 2, true, null],
+            'curse': [0, -2, true, null],
+            'frost': [1, -1, true, 'frost']
+        }
     }
 }
 
@@ -296,7 +452,10 @@ var app10 = new Vue({
     methods: {
         getProbabilitiesMessage: function() {
             console.log("abilityEffects in Vue(): ", this.abilityEffects)
-            probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max))
+            probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max));
+        },
+        setCampaignTokens: function(event) {
+            this.tokens = data.campaignTokenSets[event.target.value]
         }
     }
 })

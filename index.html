@@ -20,12 +20,19 @@
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
         <hr/>
-        <div class="block"><span>Redraw max: <input v-model.number="redraw_max" type="number"></span>
+        <div class="block">
+            <span>Redraw max: <input v-model.number="redraw_max" type="number"></span><br>
         </div>
         <div class="columns">
             <div class="column is-half">
                 <div class="block">
                     <h1 class="title">Token Configuration</h1>
+                    <span>Use starting tokens from campaign:</span>
+                    <select @change="setCampaignTokens($event)">
+                        <option v-for="option in campaignOptions" v-bind:value="option.value">
+                            {{ option.text }}
+                        </option>
+                    </select>
                     <table class="table">
                         <tr>
                             <th>Token</th>
