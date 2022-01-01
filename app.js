@@ -4,6 +4,13 @@ function saveData(name, data) {
     localStorage.setItem(name, JSON.stringify(data));
 }
 
+function checkStoredData(loadedData, defaultData) {
+    var keysLoaded = Object.keys(loadedData),
+        keysDefault = Object.keys(defaultData);
+    return keysLoaded.length === keysDefault.length &&
+        keysLoaded.every(k => defaultData.hasOwnProperty(k))
+}
+
 function loadData(name) {
     var loaded = JSON.parse(localStorage.getItem(name));
     return loaded
@@ -60,9 +67,7 @@ function calculateTotal(previousTotal, token, modifiers) {
 function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redraw_max, allResults, modifiers) {
     remainingOptions.forEach(function(token, i) {
         // Calculate result, assuming now additional stuff happening
-        console.log('last: ', lastDraw, 'current: ', token[2], 'autofail after: ', token[3])
         if (lastDraw && lastDraw == token[3]) { // If the previous draw would make this an autofail, do that
-            console.log('autofailed on ', lastDraw, token[2], token[3])
             allResults.push([autofail_value, probMod]);
         } else if (token[1] && modifiers[token[2]][2] != 'noRedraw') { // If this is a token that prompts a redraw, do that
             if (drawCount + 1 > redraw_max) { // If this draw is too many redraws - treat as an autofail to speed up calculation
@@ -85,15 +90,12 @@ function aggregate(results) {
     var prob = new Object();
     r = range(-25, 21).concat([-999])
     r.forEach(function(value, i) {
-        //prob[i] = sum([p for v, p in results if v == i])* 100
         const filteredResults = results.filter(function(array) {
             return array.includes(value)
         })
         if (filteredResults.length != 0) {
-            //console.log(filteredResults[0], filteredResults[0][1], typeof (filteredResults[0][1]))
             const probSumFunction = (sum, curr) => sum + curr[1];
             prob[value] = filteredResults.reduce(probSumFunction, 0) * 100;
-            //console.log(prob)
         }
     })
 
@@ -136,7 +138,6 @@ function sumStuffDown(prob, target) {
 function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
     var allResults = [];
     var bag = makeBag(tokens);
-    console.log("abilityEffects in run(): ", abilityEffects);
     prepareModifiers(abilitiesActive, abilityEffects, modifiers);
     calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers);
     var cumulative = aggregate(allResults);
@@ -240,6 +241,7 @@ var data = {
         'frost': []
     },
     redraw_max: 4,
+    whichBlock: "tokens", // "tokens", "settings", or "abilities"
     tokenOptions: [
         { text: "", value: null },
         { text: "Bless", value: "bless" },
@@ -441,7 +443,7 @@ var data = {
 }
 
 let tryData = loadData(saveName)
-if (tryData != null) {
+if (tryData != null && checkStoredData(tryData, data)) {
     data = tryData
 }
 probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
@@ -451,13 +453,15 @@ var app10 = new Vue({
     data: data,
     methods: {
         getProbabilitiesMessage: function() {
-            console.log("abilityEffects in Vue(): ", this.abilityEffects)
             probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max));
         },
         setCampaignTokens: function(event) {
             if (event.target.value != "custom") {
                 this.tokens = data.campaignTokenSets[event.target.value]
             }
+        },
+        changeTabs: function(tab) {
+            this.whichBlock = tab;
         }
     }
 })
