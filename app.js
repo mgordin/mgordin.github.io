@@ -22,7 +22,7 @@ function makeBag(tokens) {
     var bag = []
     for (const [token_name, token] of Object.entries(tokens)) {
         for (let i = 1; i <= token[0]; i++) {
-            bag.push([token[1], token[2], token_name, token[3]])
+            bag.push([token[1], token[2], token_name, token[3], token[4]])
         }
     };
     return bag
@@ -65,9 +65,13 @@ function calculateTotal(previousTotal, token, modifiers) {
 }
 
 function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redraw_max, allResults, modifiers) {
+    console.log('remainingOptions', remainingOptions)
     remainingOptions.forEach(function(token, i) {
         // Calculate result, assuming now additional stuff happening
-        if (lastDraw && lastDraw == token[3]) { // If the previous draw would make this an autofail, do that
+        console.log('0, 4', token[0], token[4])
+        if (token[0] == autofail_value || token[4]) { // Special case so autofail always has same value / to recognize autofail checkbox
+            allResults.push([autofail_value, probMod]);
+        } else if (lastDraw && lastDraw == token[3]) { // If the previous draw would make this an autofail, do that
             allResults.push([autofail_value, probMod]);
         } else if (token[1] && modifiers[token[2]][2] != 'noRedraw') { // If this is a token that prompts a redraw, do that
             if (drawCount + 1 > redraw_max) { // If this draw is too many redraws - treat as an autofail to speed up calculation
@@ -77,8 +81,6 @@ function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, dra
                 calculationStep(
                     remainingOptions.slice(0, i).concat(remainingOptions.slice(i + 1)), total, probMod / (remainingOptions.length - 1), token[2], drawCount + 1, autofail_value, redraw_max, allResults, modifiers)
             }
-        } else if (token[0] == autofail_value) { // Special case so autofail always has same value
-            allResults.push([autofail_value, probMod]);
         } else { // No redraw - just spit out the current total and probability
             var total = calculateTotal(previousTotal, token, modifiers)
             allResults.push([total, probMod]);
@@ -137,7 +139,9 @@ function sumStuffDown(prob, target) {
 
 function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
     var allResults = [];
+    console.log('making bag - tokens', tokens)
     var bag = makeBag(tokens);
+    console.log('bag', bag)
     prepareModifiers(abilitiesActive, abilityEffects, modifiers);
     calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers);
     var cumulative = aggregate(allResults);
@@ -208,23 +212,23 @@ async function probabilityPlot(p) {
 // Params
 var saveName = "mgArkhamChaosBagData"
 var data = {
-    tokens: {
-        '+1': [1, 1, false, null],
-        '0': [2, 0, false, null],
-        '-1': [3, -1, false, null],
-        '-2': [2, -2, false, null],
-        '-3': [1, -3, false, null],
-        '-4': [1, -4, false, null],
-        '-5': [0, -5, false, null],
-        'skull': [2, -2, false, null],
-        'cultist': [2, -2, false, null],
-        'tablet': [1, -3, false, null],
-        'elderThing': [2, -4, false, null],
-        'star': [1, 1, false, null],
-        'autofail': [1, -999, false, null],
-        'bless': [0, 2, true, null],
-        'curse': [0, -2, true, null],
-        'frost': [4, -1, true, 'frost']
+    tokens: { // [count, value, redraw, autofail-if-after, is-autofail]
+        '+1': [1, 1, false, null, false],
+        '0': [2, 0, false, null, false],
+        '-1': [3, -1, false, null, false],
+        '-2': [2, -2, false, null, false],
+        '-3': [1, -3, false, null, false],
+        '-4': [1, -4, false, null, false],
+        '-5': [0, -5, false, null, false],
+        'skull': [2, -2, false, null, false],
+        'cultist': [2, -2, false, null, false],
+        'tablet': [1, -3, false, null, false],
+        'elderThing': [2, -4, false, null, false],
+        'star': [1, 1, false, null, false],
+        'autofail': [1, -999, false, null, true],
+        'bless': [0, 2, true, null, false],
+        'curse': [0, -2, true, null, false],
+        'frost': [4, -1, true, 'frost', false]
     },
     modifiers: {
         '+1': [],
@@ -450,6 +454,7 @@ let tryData = loadData(saveName)
 if (tryData != null && checkStoredData(tryData, data)) {
     data = tryData
 }
+console.log('data.tokens', data.tokens)
 probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
 
 var app10 = new Vue({
