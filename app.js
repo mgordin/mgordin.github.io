@@ -455,7 +455,9 @@ var app10 = new Vue({
             probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max));
         },
         setCampaignTokens: function(event) {
-            this.tokens = data.campaignTokenSets[event.target.value]
+            if (event.target.value != "custom") {
+                this.tokens = data.campaignTokenSets[event.target.value]
+            }
         }
     }
 })
