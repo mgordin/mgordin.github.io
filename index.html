@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+<script src="https://kit.fontawesome.com/40500d7576.js" crossorigin="anonymous"></script>
 
 <head>
     <title>Arkham Horror Chaos Bag Probability Calculator</title>
@@ -20,11 +21,26 @@
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
         <hr/>
-        <div class="tabs">
+        <div class="tabs is-boxed">
             <ul>
-                <li v-bind:class="{ 'is-active' : whichBlock == 'tokens' }" v-on:click="changeTabs('tokens')"><a>Tokens</a></li>
-                <li v-bind:class="{ 'is-active' : whichBlock == 'abilities' }" v-on:click="changeTabs('abilities')"><a>Abilities</a></li>
-                <li v-bind:class="{ 'is-active' : whichBlock == 'settings' }" v-on:click="changeTabs('settings')"><a>Settings</a></li>
+                <li v-bind:class="{ 'is-active' : whichBlock == 'tokens' }" v-on:click="changeTabs('tokens')">
+                    <a>
+                        <span class="icon is-small"><i class="fas fa-coins" aria-hidden="true"></i></span>
+                        <span>Tokens</span>
+                    </a>
+                </li>
+                <li v-bind:class="{ 'is-active' : whichBlock == 'abilities' }" v-on:click="changeTabs('abilities')">
+                    <a>
+                        <span class="icon is-small"><i class="fas fa-magic" aria-hidden="true"></i></span>
+                        <span>Abilities</span>
+                    </a>
+                </li>
+                <li v-bind:class="{ 'is-active' : whichBlock == 'settings' }" v-on:click="changeTabs('settings')">
+                    <a>
+                        <span class="icon is-small"><i class="fas fa-cog" aria-hidden="true"></i></span>
+                        <span>Settings</span>
+                    </a>
+                </li>
             </ul>
         </div>
         <div class="block" v-if="whichBlock == 'settings'">

@@ -147,8 +147,8 @@ function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
 }
 
 async function probabilityPlot(p) {
-    xValue = range(-2, 5);
-    yValue = [
+    var xValue = range(-2, 5);
+    var yValue = [
         Math.round(p[-2]),
         Math.round(p[-1]),
         Math.round(p[0]),
@@ -158,21 +158,25 @@ async function probabilityPlot(p) {
         Math.round(p[4]),
         Math.round(p[5])
     ];
+    var textValueRaw = yValue.map(String)
+    var textValue = []
+    textValueRaw.forEach(function(val, i) {
+        textValue.push(val + "%")
+    })
     var data = [{
         x: xValue,
         y: yValue,
         type: 'bar',
-        text: yValue.map(String),
+        text: textValue,
         textposition: 'auto',
         textfont: {
             size: 18
         }
     }];
     var layout = {
-        title: "Chance of success",
         xaxis: {
             title: {
-                text: 'Skill Value vs. Test Difficulty',
+                text: 'Skill value minus test difficulty',
                 font: {
                     size: 18
                 }
@@ -183,7 +187,7 @@ async function probabilityPlot(p) {
         },
         yaxis: {
             title: {
-                text: 'Probability of Success',
+                text: 'Probability of success (%)',
                 font: {
                     size: 18
                 }
