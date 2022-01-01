@@ -134,13 +134,14 @@ function sumStuffDown(prob, target) {
 // Test it out
 
 function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
-    var allResults = []
-    bag = makeBag(tokens)
-    console.log("abilityEffects in run(): ", abilityEffects)
-    prepareModifiers(abilitiesActive, abilityEffects, modifiers)
-    calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers)
-    cumulative = aggregate(allResults)
-    saveData(saveName, data)
+    //console.log('running: ', running)
+    var allResults = [];
+    var bag = makeBag(tokens);
+    console.log("abilityEffects in run(): ", abilityEffects);
+    prepareModifiers(abilitiesActive, abilityEffects, modifiers);
+    calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers);
+    var cumulative = aggregate(allResults);
+    saveData(saveName, data);
 
     return cumulative
 }
@@ -240,7 +241,6 @@ var data = {
         'frost': []
     },
     redraw_max: 4,
-    variable_tokens: ['skull', 'cultist', 'tablet', 'elderThing'],
     tokenOptions: [
         { text: "", value: null },
         { text: "Bless", value: "bless" },
@@ -286,12 +286,8 @@ var data = {
 
 let tryData = loadData(saveName)
 if (tryData != null) {
-    console.log("Gonna overwrite this stuff, yeah")
     data = tryData
-} else {
-    console.log("nop")
 }
-
 probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
 
 var app10 = new Vue({

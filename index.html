@@ -2,13 +2,20 @@
 
 <body>
     <div id="app-10">
+        <nav class="navbar is-dark has-shadow is-fixed-top">
+            <div class="navbar-brand">
+                <h1>Arkham Horror Chaos Bag Calculator</h1>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <button class="button is-primary" v-on:click="getProbabilitiesMessage">Calculate probabilities</button>
+                </div>
+            </div>
+        </nav>
         <div id='probPlot'>
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
         <hr/>
-        <div class="block">
-            <span><button class="button is-primary" v-on:click="getProbabilitiesMessage">Calculate probabilities</button></span><br>
-        </div>
         <div class="block"><span>Redraw max: <input v-model.number="redraw_max" type="number"></span>
         </div>
         <div class="columns">
