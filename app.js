@@ -5,8 +5,8 @@ function saveData(name, data) {
 }
 
 function loadData(name) {
-    data = JSON.parse(localStorage.getItem(name));
-    return data
+    var loaded = JSON.parse(localStorage.getItem(name));
+    return loaded
 }
 
 // Bag is a list of lists, each interior list is one token as 
