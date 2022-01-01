@@ -285,7 +285,7 @@ var data = {
 }
 
 let tryData = loadData(saveName)
-if (tryData) {
+if (tryData != null) {
     data = tryData
 }
 
