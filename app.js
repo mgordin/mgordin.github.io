@@ -8,7 +8,11 @@ function checkStoredData(loadedData, defaultData) {
     var keysLoaded = Object.keys(loadedData),
         keysDefault = Object.keys(defaultData);
     return keysLoaded.length === keysDefault.length &&
-        keysLoaded.every(k => defaultData.hasOwnProperty(k))
+        keysLoaded.every(k => defaultData.hasOwnProperty(k) && (
+            loadedData[k] && loadedData[k].constructor == Object ||
+                defaultData[k] && defaultData[k].constructor == Object
+                ? checkStoredData(loadedData[k], defaultData[k])
+                : true));
 }
 
 function loadData(name) {
@@ -33,7 +37,7 @@ function prepareModifiers(abilitiesActive, abilityEffects, modifiers) {
         modifiers[k] = [];
     };
     if (abilitiesActive.length != 0) {
-        abilitiesActive.forEach(function(ability, i) {
+        abilitiesActive.forEach(function (ability, i) {
             var abilityEffect = abilityEffects[ability];
             for (const [k, v] of Object.entries(abilityEffect)) {
                 if (modifiers[k].length == 0 || abilityEffect[k][0] == 's') {
@@ -70,7 +74,7 @@ function getTokenRange(tokens) {
     var maxSingle = -999;
     var min = 0;
     var minSingle = 999;
-    tokens.forEach(function(v, i) {
+    tokens.forEach(function (v, i) {
         if (v[0] > 0 && v[1]) {
             max += v[0]
         } else if (v[0] < 0 && v[1]) {
@@ -87,7 +91,7 @@ function getTokenRange(tokens) {
 }
 
 function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redraw_max, allResults, modifiers) {
-    remainingOptions.forEach(function(token, i) {
+    remainingOptions.forEach(function (token, i) {
         // Calculate result, assuming now additional stuff happening
         console.log('0, 4', token[0], token[4])
         if (token[0] == autofail_value || token[4]) { // Special case so autofail always has same value / to recognize autofail checkbox
@@ -113,8 +117,8 @@ function aggregate(results, bag) {
     var prob = new Object();
     var tokenRange = getTokenRange(bag)
     r = range(tokenRange[0], tokenRange[1]).concat([-999])
-    r.forEach(function(value, i) {
-        const filteredResults = results.filter(function(array) {
+    r.forEach(function (value, i) {
+        const filteredResults = results.filter(function (array) {
             return array.includes(value)
         })
         if (filteredResults.length != 0) {
@@ -186,7 +190,7 @@ async function probabilityPlot(p) {
     ];
     var textValueRaw = yValue.map(String)
     var textValue = []
-    textValueRaw.forEach(function(val, i) {
+    textValueRaw.forEach(function (val, i) {
         textValue.push(val + "%")
     })
     var data = [{
@@ -321,7 +325,10 @@ var data = {
     },
     campaignOptions: [
         { text: "Custom", value: "custom" },
+        { text: "Night of the Zealot (Easy)", value: "notz_e" },
         { text: "Night of the Zealot (Standard)", value: "notz_s" },
+        { text: "Night of the Zealot (Hard)", value: "notz_h" },
+        { text: "Night of the Zealot (Expert)", value: "notz_x" },
         { text: "The Dunwich Legacy (Standard)", value: "dl_s" },
         { text: "The Path to Carcosa (Standard)", value: "ptc_s" },
         { text: "The Forgotten Age (Standard)", value: "fa_s" },
@@ -513,15 +520,15 @@ var app10 = new Vue({
     el: '#app-10',
     data: data,
     methods: {
-        getProbabilitiesMessage: function() {
+        getProbabilitiesMessage: function () {
             probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max));
         },
-        setCampaignTokens: function(event) {
+        setCampaignTokens: function (event) {
             if (event.target.value != "custom") {
                 this.tokens = data.campaignTokenSets[event.target.value]
             }
         },
-        changeTabs: function(tab) {
+        changeTabs: function (tab) {
             this.whichBlock = tab;
         }
     }
