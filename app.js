@@ -54,6 +54,7 @@ function range(start, end) {
 
 function calculateTotal(previousTotal, token, modifiers) {
     var total = previousTotal + token[0];
+    console.log('modifiers', modifiers, token)
     if (modifiers[token[2]].length != 0) {
         if (modifiers[token[2]][0] == 'a') {
             total += modifiers[token[2]][1]
@@ -64,8 +65,28 @@ function calculateTotal(previousTotal, token, modifiers) {
     return total
 }
 
+function getTokenRange(tokens) {
+    var max = 0;
+    var maxSingle = -999;
+    var min = 0;
+    var minSingle = 999;
+    tokens.forEach(function(v, i) {
+        if (v[0] > 0 && v[1]) {
+            max += v[0]
+        } else if (v[0] < 0 && v[1]) {
+            min += v[0]
+        }
+        if (v[0] > maxSingle && !(v[1])) {
+            maxSingle = v[0]
+        } else if (v[0] < minSingle && !(v[1]) && !(v[4])) {
+            minSingle = v[0]
+        }
+    })
+
+    return [min + minSingle, max + maxSingle];
+}
+
 function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redraw_max, allResults, modifiers) {
-    console.log('remainingOptions', remainingOptions)
     remainingOptions.forEach(function(token, i) {
         // Calculate result, assuming now additional stuff happening
         console.log('0, 4', token[0], token[4])
@@ -88,9 +109,10 @@ function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, dra
     });
 }
 
-function aggregate(results) {
+function aggregate(results, bag) {
     var prob = new Object();
-    r = range(-25, 21).concat([-999])
+    var tokenRange = getTokenRange(bag)
+    r = range(tokenRange[0], tokenRange[1]).concat([-999])
     r.forEach(function(value, i) {
         const filteredResults = results.filter(function(array) {
             return array.includes(value)
@@ -144,7 +166,7 @@ function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
     console.log('bag', bag)
     prepareModifiers(abilitiesActive, abilityEffects, modifiers);
     calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers);
-    var cumulative = aggregate(allResults);
+    var cumulative = aggregate(allResults, bag);
     saveData(saveName, data);
 
     return cumulative
@@ -220,6 +242,9 @@ var data = {
         '-3': [1, -3, false, null, false],
         '-4': [1, -4, false, null, false],
         '-5': [0, -5, false, null, false],
+        '-6': [0, -6, false, null, false],
+        '-7': [0, -7, false, null, false],
+        '-8': [0, -8, false, null, false],
         'skull': [2, -2, false, null, false],
         'cultist': [2, -2, false, null, false],
         'tablet': [1, -3, false, null, false],
@@ -238,6 +263,9 @@ var data = {
         '-3': [],
         '-4': [],
         '-5': [],
+        '-6': [],
+        '-7': [],
+        '-8': [],
         'skull': [],
         'cultist': [],
         'tablet': [],
@@ -304,148 +332,172 @@ var data = {
     ],
     campaignTokenSets: {
         "notz_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [3, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [1, -2, false, null],
-            'tablet': [1, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [3, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [1, -2, false, null, false],
+            'tablet': [1, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "dl_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [3, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [1, -2, false, null],
-            'tablet': [0, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [3, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [1, -2, false, null, false],
+            'tablet': [0, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "ptc_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [3, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [3, -2, false, null],
-            'cultist': [0, -2, false, null],
-            'tablet': [0, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [3, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [3, -2, false, null, false],
+            'cultist': [0, -2, false, null, false],
+            'tablet': [0, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "fa_s": {
-            '+1': [1, 1, false, null],
-            '0': [3, 0, false, null],
-            '-1': [1, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [0, -4, false, null],
-            '-5': [1, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [0, -2, false, null],
-            'tablet': [0, -3, false, null],
-            'elderThing': [1, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [3, 0, false, null, false],
+            '-1': [1, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [0, -4, false, null, false],
+            '-5': [1, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [0, -2, false, null, false],
+            'tablet': [0, -3, false, null, false],
+            'elderThing': [1, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "cu_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [2, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [0, -2, false, null],
-            'tablet': [0, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [2, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [0, -2, false, null, false],
+            'tablet': [0, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "dea_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [2, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [0, -2, false, null],
-            'cultist': [1, -2, false, null],
-            'tablet': [2, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [2, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [0, -2, false, null, false],
+            'cultist': [1, -2, false, null, false],
+            'tablet': [2, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "deb_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [3, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [1, -2, false, null],
-            'tablet': [0, -3, false, null],
-            'elderThing': [2, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [0, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [3, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [1, -2, false, null, false],
+            'tablet': [0, -3, false, null, false],
+            'elderThing': [2, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [0, -1, true, 'frost', false]
         },
         "eote_s": {
-            '+1': [1, 1, false, null],
-            '0': [2, 0, false, null],
-            '-1': [3, -1, false, null],
-            '-2': [2, -2, false, null],
-            '-3': [1, -3, false, null],
-            '-4': [1, -4, false, null],
-            '-5': [0, -5, false, null],
-            'skull': [2, -2, false, null],
-            'cultist': [1, -2, false, null],
-            'tablet': [1, -3, false, null],
-            'elderThing': [0, -4, false, null],
-            'star': [1, 1, false, null],
-            'autofail': [1, -999, false, null],
-            'bless': [0, 2, true, null],
-            'curse': [0, -2, true, null],
-            'frost': [1, -1, true, 'frost']
+            '+1': [1, 1, false, null, false],
+            '0': [2, 0, false, null, false],
+            '-1': [3, -1, false, null, false],
+            '-2': [2, -2, false, null, false],
+            '-3': [1, -3, false, null, false],
+            '-4': [1, -4, false, null, false],
+            '-5': [0, -5, false, null, false],
+            '-6': [0, -6, false, null, false],
+            '-7': [0, -7, false, null, false],
+            '-8': [0, -8, false, null, false],
+            'skull': [2, -2, false, null, false],
+            'cultist': [1, -2, false, null, false],
+            'tablet': [1, -3, false, null, false],
+            'elderThing': [0, -4, false, null, false],
+            'star': [1, 1, false, null, false],
+            'autofail': [1, -999, false, null, true],
+            'bless': [0, 2, true, null, false],
+            'curse': [0, -2, true, null, false],
+            'frost': [1, -1, true, 'frost', false]
         }
     }
 }

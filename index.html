@@ -162,6 +162,48 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>-6</td>
+                    <td><input v-model.number="tokens['-6'][0]" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-6'][1]" type="number" :disabled="tokens['-6'][4]"></td>
+                    <td><input v-model="tokens['-6'][2]" type="checkbox" :disabled="tokens['-6'][4]"></td>
+                    <td><input v-model="tokens['-6'][4]" type="checkbox"></td>
+                    <td>
+                        <select v-model="tokens['-6'][3]" :disabled="tokens['-6'][4]">
+                                    <option v-for="option in tokenOptions" v-bind:value="option.value">
+                                        {{ option.text }}
+                                      </option>
+                                </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>-7</td>
+                    <td><input v-model.number="tokens['-7'][0]" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-7'][1]" type="number" :disabled="tokens['-7'][4]"></td>
+                    <td><input v-model="tokens['-7'][2]" type="checkbox" :disabled="tokens['-7'][4]"></td>
+                    <td><input v-model="tokens['-7'][4]" type="checkbox"></td>
+                    <td>
+                        <select v-model="tokens['-7'][3]" :disabled="tokens['-7'][4]">
+                                    <option v-for="option in tokenOptions" v-bind:value="option.value">
+                                        {{ option.text }}
+                                      </option>
+                                </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>-8</td>
+                    <td><input v-model.number="tokens['-8'][0]" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-8'][1]" type="number" :disabled="tokens['-8'][4]"></td>
+                    <td><input v-model="tokens['-8'][2]" type="checkbox" :disabled="tokens['-8'][4]"></td>
+                    <td><input v-model="tokens['-8'][4]" type="checkbox"></td>
+                    <td>
+                        <select v-model="tokens['-8'][3]" :disabled="tokens['-8'][4]">
+                                    <option v-for="option in tokenOptions" v-bind:value="option.value">
+                                        {{ option.text }}
+                                      </option>
+                                </select>
+                    </td>
+                </tr>
+                <tr>
                     <td>Skull</td>
                     <td><input v-model.number="tokens['skull'][0]" type="number" min="0" max="4"></td>
                     <td><input v-model.number="tokens['skull'][1]" type="number" :disabled="tokens['skull'][4]"></td>
