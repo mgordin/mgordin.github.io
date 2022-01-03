@@ -44,7 +44,7 @@
             </ul>
         </div>
         <div class="block" v-if="whichBlock == 'settings'">
-            <span>Redraw max: <input v-model.number="redraw_max" type="number"></span><br>
+            <span>Redraw max: <input v-model.number="redrawMax" type="number"></span><br>
             <span>How to resolve redraw over max: 
                 <select v-model="redrawHandling">
                     <option v-for="option in redrawOptions" v-bind:value="option.value">
@@ -351,6 +351,7 @@
     </div>
 </body>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.0.0/math.js" integrity="sha512-+KihqiIrhYt4/tFb42KiOJ+wr0PM6dVMw9twO1Ju+sZ0OdgurvE/9dy2jAS0Fr0MCVryF2EXxPH9HRXg6CaFgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>

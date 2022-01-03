@@ -58,7 +58,6 @@ function range(start, end) {
 
 function calculateTotal(previousTotal, token, modifiers) {
     var total = previousTotal + token[0];
-    console.log('modifiers', modifiers, token)
     if (modifiers[token[2]].length != 0) {
         if (modifiers[token[2]][0] == 'a') {
             total += modifiers[token[2]][1]
@@ -90,21 +89,60 @@ function getTokenRange(tokens) {
     return [min + minSingle, max + maxSingle];
 }
 
-function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redraw_max, allResults, modifiers) {
+function handleTooManyRedraws(total, tokens, handling, autofail_value) {
+    var tokenRegex = /t(\+|-)\d/;
+    if (handling == "autofail") {
+        console.log("autofail", autofail_value)
+        return autofail_value;
+    } else if (handling == "median") {
+        console.log("tokens", tokens)
+        var tokenValues = []
+        tokens.forEach(function (token, i) {
+            if (!(token[1])) {
+                tokenValues.push(token[0])
+            }
+        });
+        console.log("remaining values", tokenValues)
+        var tokenMedian = math.median(tokenValues)
+        console.log("median", tokenMedian)
+        return total + tokenMedian;
+    } else if (handling == "average") {
+        var tokenValues = []
+        tokens.forEach(function (token, i) {
+            if (!(token[1]) && token[0] != autofail_value && token) {
+                tokenValues.push(token[0])
+            }
+        });
+        var tokenAverage = math.mean(tokenValues)
+        console.log("average", tokenAverage)
+        return total + tokenAverage;
+    } else if (tokenRegex.test(handling)) {
+        var tokenValue = parseInt(handling.substring(1))
+        console.log("token", tokenValue)
+        return total + tokenValue;
+    } else {
+        console.log("Handling for too many redraws hit an unrecognized 'handling' parameter")
+    }
+}
+
+function calculationStep(remainingOptions, previousTotal, probMod, lastDraw, drawCount, autofail_value, redrawMax, allResults, modifiers, redrawHandling) {
+    console.log("handling: ", redrawHandling)
     remainingOptions.forEach(function (token, i) {
         // Calculate result, assuming now additional stuff happening
-        console.log('0, 4', token[0], token[4])
         if (token[0] == autofail_value || token[4]) { // Special case so autofail always has same value / to recognize autofail checkbox
             allResults.push([autofail_value, probMod]);
         } else if (lastDraw && lastDraw == token[3]) { // If the previous draw would make this an autofail, do that
             allResults.push([autofail_value, probMod]);
         } else if (token[1] && modifiers[token[2]][2] != 'noRedraw') { // If this is a token that prompts a redraw, do that
-            if (drawCount + 1 > redraw_max) { // If this draw is too many redraws - treat as an autofail to speed up calculation
-                allResults.push([autofail_value, probMod]);
+            console.log("Redraw", "Next draw is ", drawCount + 1, "Max: ", redrawMax)
+            var total = calculateTotal(previousTotal, token, modifiers)
+            if (drawCount + 1 > redrawMax) { // If this draw is too many redraws - treat as an autofail to speed up calculation
+                console.log("Resolve!")
+                allResults.push([handleTooManyRedraws(total, remainingOptions, redrawHandling, autofail_value), probMod]);
             } else {
-                var total = calculateTotal(previousTotal, token, modifiers)
+                console.log("Draw!")
                 calculationStep(
-                    remainingOptions.slice(0, i).concat(remainingOptions.slice(i + 1)), total, probMod / (remainingOptions.length - 1), token[2], drawCount + 1, autofail_value, redraw_max, allResults, modifiers)
+                    remainingOptions.slice(0, i).concat(remainingOptions.slice(i + 1)), total, probMod / (remainingOptions.length - 1), token[2], drawCount + 1, autofail_value, redrawMax, allResults, modifiers, redrawHandling)
             }
         } else { // No redraw - just spit out the current total and probability
             var total = calculateTotal(previousTotal, token, modifiers)
@@ -163,13 +201,11 @@ function sumStuffDown(prob, target) {
 
 // Test it out
 
-function run(tokens, abilitiesActive, abilityEffects, modifiers, redraw_max) {
+function run(tokens, abilitiesActive, abilityEffects, modifiers, redrawMax, redrawHandling) {
     var allResults = [];
-    console.log('making bag - tokens', tokens)
     var bag = makeBag(tokens);
-    console.log('bag', bag)
     prepareModifiers(abilitiesActive, abilityEffects, modifiers);
-    calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redraw_max, allResults, modifiers);
+    calculationStep(bag, 0, 1 / bag.length, null, 1, tokens['autofail'][1], redrawMax, allResults, modifiers, redrawHandling);
     var cumulative = aggregate(allResults, bag);
     saveData(saveName, data);
 
@@ -280,21 +316,22 @@ var data = {
         'curse': [],
         'frost': []
     },
-    redraw_max: 4,
+    redrawMax: 4,
     redrawHandling: "autofail",
     redrawOptions: [
-        { text: "Treat as autofail", value: "autofail" },
-        { text: "Apply median token value", value: "+1" },
-        { text: "Apply token value: +1", value: "+1" },
-        { text: "Apply token value: 0", value: "0" },
-        { text: "Apply token value: -1", value: "-1" },
-        { text: "Apply token value: -2", value: "-2" },
-        { text: "Apply token value: -3", value: "-3" },
-        { text: "Apply token value: -4", value: "-4" },
-        { text: "Apply token value: -5", value: "-5" },
-        { text: "Apply token value: -6", value: "-6" },
-        { text: "Apply token value: +7", value: "-7" },
-        { text: "Apply token value: +8", value: "-8" },
+        { text: "Treat as autofail", value: "autofail", param: -999 },
+        { text: "Apply median value of (remaining, non-redraw, non-autofail) tokens, rounded down", value: "median" },
+        { text: "Apply average value of (remaining, non-redraw, non-autofail) tokens, rounded down", value: "average" },
+        { text: "Apply token value: +1", value: "t1" },
+        { text: "Apply token value: 0", value: "t0" },
+        { text: "Apply token value: -1", value: "t-1" },
+        { text: "Apply token value: -2", value: "t-2" },
+        { text: "Apply token value: -3", value: "t-3" },
+        { text: "Apply token value: -4", value: "t-4" },
+        { text: "Apply token value: -5", value: "t-5" },
+        { text: "Apply token value: -6", value: "t-6" },
+        { text: "Apply token value: +7", value: "t-7" },
+        { text: "Apply token value: +8", value: "t-8" },
     ],
     whichBlock: "tokens", // "tokens", "settings", or "abilities"
     tokenOptions: [
@@ -1141,15 +1178,14 @@ let tryData = loadData(saveName)
 if (tryData != null && checkStoredData(tryData, data)) {
     data = tryData
 }
-console.log('data.tokens', data.tokens)
-probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redraw_max))
+probabilityPlot(run(data.tokens, data.abilitiesActive, data.abilityEffects, data.modifiers, data.redrawMax, data.redrawHandling))
 
 var app10 = new Vue({
     el: '#app-10',
     data: data,
     methods: {
         getProbabilitiesMessage: function () {
-            probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redraw_max));
+            probabilityPlot(run(this.tokens, this.abilitiesActive, this.abilityEffects, this.modifiers, this.redrawMax, this.redrawHandling));
         },
         setCampaignTokens: function (event) {
             if (event.target.value != "custom") {
