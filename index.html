@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <div id="app-10">
+    <div id="app">
         <nav class="navbar is-dark has-shadow is-fixed-top">
             <div class="navbar-brand">
                 <h1>Arkham Horror Chaos Bag Calculator</h1>
@@ -20,6 +20,7 @@
         <div id='probPlot'>
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
+        
         <hr/>
         <div class="tabs is-boxed">
             <ul>
@@ -44,14 +45,24 @@
             </ul>
         </div>
         <div class="block" v-if="whichBlock == 'settings'">
-            <span>Redraw max: <input v-model.number="redrawMax" type="number"></span><br>
-            <span>How to resolve redraw over max: 
+            <h1 class="title is-4">Redraw handling</h1>
+            <p>With many "draw another token" tokens in the bag (e.g., Bless and Curse), calculating draw probabilities becomes very slow.  The setting below let you customize redraw handling - setting a max number of redraws to calculate, and how to resolve redraws past that max.  Clicking the "Plot redraw probabilities" button below will plot the probability of getting 1 - 10 redraws given your current token settings - i.e., what part of your overall token draw probability will be incorrect for a redraw max below your actual possible redraws.  This can help inform what you set "Redraw max" to.</p>
+            <br>
+            <div>Redraw max: <input v-model.number="redrawMax" type="number"></div>
+            <div>How to resolve redraw over max: 
                 <select v-model="redrawHandling">
                     <option v-for="option in redrawOptions" v-bind:value="option.value">
                         {{ option.text }}
                       </option>
                 </select>
-            </span>
+            </div>
+            <div>
+                <button class="button is-primary" v-on:click="updateRedrawsPlot">Plot redraw probabilities</button>
+            </div>
+            <div id='redrawsPlot'>
+                <!-- Plotly chart will be drawn inside this DIV -->
+            </div>
+            
         </div>
         <div class="block" v-else-if="whichBlock == 'tokens'">
             <h1 class="title">Token Configuration</h1>
@@ -72,12 +83,12 @@
                 </tr>
                 <tr>
                     <td>+1</td>
-                    <td><input v-model.number="tokens['+1'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['+1'][1]" type="number" :disabled="tokens['+1'][4]"></td>
-                    <td><input v-model="tokens['+1'][2]" type="checkbox" :disabled="tokens['+1'][4]"></td>
-                    <td><input v-model="tokens['+1'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['+1']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['+1']['value']" type="number" :disabled="tokens['+1']['autofail']"></td>
+                    <td><input v-model="tokens['+1']['redraw']" type="checkbox" :disabled="tokens['+1']['autofail']"></td>
+                    <td><input v-model="tokens['+1']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['+1'][3]" :disabled="tokens['+1'][4]">
+                        <select v-model="tokens['+1']['autofailAfter']" :disabled="tokens['+1']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -86,12 +97,12 @@
                 </tr>
                 <tr>
                     <td>0</td>
-                    <td><input v-model.number="tokens['0'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['0'][1]" type="number" :disabled="tokens['0'][4]"></td>
-                    <td><input v-model="tokens['0'][2]" type="checkbox" :disabled="tokens['0'][4]"></td>
-                    <td><input v-model="tokens['0'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['0']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['0']['value']" type="number" :disabled="tokens['0']['autofail']"></td>
+                    <td><input v-model="tokens['0']['redraw']" type="checkbox" :disabled="tokens['0']['autofail']"></td>
+                    <td><input v-model="tokens['0']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['0'][3]" :disabled="tokens['0'][4]">
+                        <select v-model="tokens['0']['autofailAfter']" :disabled="tokens['0']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -100,12 +111,12 @@
                 </tr>
                 <tr>
                     <td>-1</td>
-                    <td><input v-model.number="tokens['-1'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-1'][1]" type="number" :disabled="tokens['-1'][4]"></td>
-                    <td><input v-model="tokens['-1'][2]" type="checkbox" :disabled="tokens['-1'][4]"></td>
-                    <td><input v-model="tokens['-1'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-1']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-1']['value']" type="number" :disabled="tokens['-1']['autofail']"></td>
+                    <td><input v-model="tokens['-1']['redraw']" type="checkbox" :disabled="tokens['-1']['autofail']"></td>
+                    <td><input v-model="tokens['-1']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-1'][3]" :disabled="tokens['-1'][4]">
+                        <select v-model="tokens['-1']['autofailAfter']" :disabled="tokens['-1']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -114,12 +125,12 @@
                 </tr>
                 <tr>
                     <td>-2</td>
-                    <td><input v-model.number="tokens['-2'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-2'][1]" type="number" :disabled="tokens['-2'][4]"></td>
-                    <td><input v-model="tokens['-2'][2]" type="checkbox" :disabled="tokens['-2'][4]"></td>
-                    <td><input v-model="tokens['-2'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-2']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-2']['value']" type="number" :disabled="tokens['-2']['autofail']"></td>
+                    <td><input v-model="tokens['-2']['redraw']" type="checkbox" :disabled="tokens['-2']['autofail']"></td>
+                    <td><input v-model="tokens['-2']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-2'][3]" :disabled="tokens['-2'][4]">
+                        <select v-model="tokens['-2']['autofailAfter']" :disabled="tokens['-2']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -128,12 +139,12 @@
                 </tr>
                 <tr>
                     <td>-3</td>
-                    <td><input v-model.number="tokens['-3'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-3'][1]" type="number" :disabled="tokens['-3'][4]"></td>
-                    <td><input v-model="tokens['-3'][2]" type="checkbox" :disabled="tokens['-3'][4]"></td>
-                    <td><input v-model="tokens['-3'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-3']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-3']['value']" type="number" :disabled="tokens['-3']['autofail']"></td>
+                    <td><input v-model="tokens['-3']['redraw']" type="checkbox" :disabled="tokens['-3']['autofail']"></td>
+                    <td><input v-model="tokens['-3']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-3'][3]" :disabled="tokens['-3'][4]">
+                        <select v-model="tokens['-3']['autofailAfter']" :disabled="tokens['-3']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -142,12 +153,12 @@
                 </tr>
                 <tr>
                     <td>-4</td>
-                    <td><input v-model.number="tokens['-4'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-4'][1]" type="number" :disabled="tokens['-4'][4]"></td>
-                    <td><input v-model="tokens['-4'][2]" type="checkbox" :disabled="tokens['-4'][4]"></td>
-                    <td><input v-model="tokens['-4'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-4']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-4']['value']" type="number" :disabled="tokens['-4']['autofail']"></td>
+                    <td><input v-model="tokens['-4']['redraw']" type="checkbox" :disabled="tokens['-4']['autofail']"></td>
+                    <td><input v-model="tokens['-4']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-4'][3]" :disabled="tokens['-4'][4]">
+                        <select v-model="tokens['-4']['autofailAfter']" :disabled="tokens['-4']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -156,12 +167,12 @@
                 </tr>
                 <tr>
                     <td>-5</td>
-                    <td><input v-model.number="tokens['-5'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-5'][1]" type="number" :disabled="tokens['-5'][4]"></td>
-                    <td><input v-model="tokens['-5'][2]" type="checkbox" :disabled="tokens['-5'][4]"></td>
-                    <td><input v-model="tokens['-5'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-5']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-5']['value']" type="number" :disabled="tokens['-5']['autofail']"></td>
+                    <td><input v-model="tokens['-5']['redraw']" type="checkbox" :disabled="tokens['-5']['autofail']"></td>
+                    <td><input v-model="tokens['-5']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-5'][3]" :disabled="tokens['-5'][4]">
+                        <select v-model="tokens['-5']['autofailAfter']" :disabled="tokens['-5']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -170,12 +181,12 @@
                 </tr>
                 <tr>
                     <td>-6</td>
-                    <td><input v-model.number="tokens['-6'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-6'][1]" type="number" :disabled="tokens['-6'][4]"></td>
-                    <td><input v-model="tokens['-6'][2]" type="checkbox" :disabled="tokens['-6'][4]"></td>
-                    <td><input v-model="tokens['-6'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-6']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-6']['value']" type="number" :disabled="tokens['-6']['autofail']"></td>
+                    <td><input v-model="tokens['-6']['redraw']" type="checkbox" :disabled="tokens['-6']['autofail']"></td>
+                    <td><input v-model="tokens['-6']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-6'][3]" :disabled="tokens['-6'][4]">
+                        <select v-model="tokens['-6']['autofailAfter']" :disabled="tokens['-6']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -184,12 +195,12 @@
                 </tr>
                 <tr>
                     <td>-7</td>
-                    <td><input v-model.number="tokens['-7'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-7'][1]" type="number" :disabled="tokens['-7'][4]"></td>
-                    <td><input v-model="tokens['-7'][2]" type="checkbox" :disabled="tokens['-7'][4]"></td>
-                    <td><input v-model="tokens['-7'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-7']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-7']['value']" type="number" :disabled="tokens['-7']['autofail']"></td>
+                    <td><input v-model="tokens['-7']['redraw']" type="checkbox" :disabled="tokens['-7']['autofail']"></td>
+                    <td><input v-model="tokens['-7']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-7'][3]" :disabled="tokens['-7'][4]">
+                        <select v-model="tokens['-7']['autofailAfter']" :disabled="tokens['-7']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -198,12 +209,12 @@
                 </tr>
                 <tr>
                     <td>-8</td>
-                    <td><input v-model.number="tokens['-8'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['-8'][1]" type="number" :disabled="tokens['-8'][4]"></td>
-                    <td><input v-model="tokens['-8'][2]" type="checkbox" :disabled="tokens['-8'][4]"></td>
-                    <td><input v-model="tokens['-8'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['-8']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['-8']['value']" type="number" :disabled="tokens['-8']['autofail']"></td>
+                    <td><input v-model="tokens['-8']['redraw']" type="checkbox" :disabled="tokens['-8']['autofail']"></td>
+                    <td><input v-model="tokens['-8']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['-8'][3]" :disabled="tokens['-8'][4]">
+                        <select v-model="tokens['-8']['autofailAfter']" :disabled="tokens['-8']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -212,12 +223,12 @@
                 </tr>
                 <tr>
                     <td>Skull</td>
-                    <td><input v-model.number="tokens['skull'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['skull'][1]" type="number" :disabled="tokens['skull'][4]"></td>
-                    <td><input v-model="tokens['skull'][2]" type="checkbox" :disabled="tokens['skull'][4]"></td>
-                    <td><input v-model="tokens['skull'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['skull']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['skull']['value']" type="number" :disabled="tokens['skull']['autofail']"></td>
+                    <td><input v-model="tokens['skull']['redraw']" type="checkbox" :disabled="tokens['skull']['autofail']"></td>
+                    <td><input v-model="tokens['skull']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['skull'][3]" :disabled="tokens['skull'][4]">
+                        <select v-model="tokens['skull']['autofailAfter']" :disabled="tokens['skull']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -226,12 +237,12 @@
                 </tr>
                 <tr>
                     <td>Cultist</td>
-                    <td><input v-model.number="tokens['cultist'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['cultist'][1]" type="number" :disabled="tokens['cultist'][4]"></td>
-                    <td><input v-model="tokens['cultist'][2]" type="checkbox" :disabled="tokens['cultist'][4]"></td>
-                    <td><input v-model="tokens['cultist'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['cultist']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['cultist']['value']" type="number" :disabled="tokens['cultist']['autofail']"></td>
+                    <td><input v-model="tokens['cultist']['redraw']" type="checkbox" :disabled="tokens['cultist']['autofail']"></td>
+                    <td><input v-model="tokens['cultist']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['cultist'][3]" :disabled="tokens['cultist'][4]">
+                        <select v-model="tokens['cultist']['autofailAfter']" :disabled="tokens['cultist']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -240,12 +251,12 @@
                 </tr>
                 <tr>
                     <td>Tablet</td>
-                    <td><input v-model.number="tokens['tablet'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['tablet'][1]" type="number" :disabled="tokens['tablet'][4]"></td>
-                    <td><input v-model="tokens['tablet'][2]" type="checkbox" :disabled="tokens['tablet'][4]"></td>
-                    <td><input v-model="tokens['tablet'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['tablet']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['tablet']['value']" type="number" :disabled="tokens['tablet']['autofail']"></td>
+                    <td><input v-model="tokens['tablet']['redraw']" type="checkbox" :disabled="tokens['tablet']['autofail']"></td>
+                    <td><input v-model="tokens['tablet']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['tablet'][3]" :disabled="tokens['tablet'][4]">
+                        <select v-model="tokens['tablet']['autofailAfter']" :disabled="tokens['tablet']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -254,12 +265,12 @@
                 </tr>
                 <tr>
                     <td>Elder Thing</td>
-                    <td><input v-model.number="tokens['elderThing'][0]" type="number" min="0" max="4"></td>
-                    <td><input v-model.number="tokens['elderThing'][1]" type="number" :disabled="tokens['elderThing'][4]"></td>
-                    <td><input v-model="tokens['elderThing'][2]" type="checkbox" :disabled="tokens['elderThing'][4]"></td>
-                    <td><input v-model="tokens['elderThing'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['elderThing']['count']" type="number" min="0" max="4"></td>
+                    <td><input v-model.number="tokens['elderThing']['value']" type="number" :disabled="tokens['elderThing']['autofail']"></td>
+                    <td><input v-model="tokens['elderThing']['redraw']" type="checkbox" :disabled="tokens['elderThing']['autofail']"></td>
+                    <td><input v-model="tokens['elderThing']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['elderThing'][3]" :disabled="tokens['elderThing'][4]">
+                        <select v-model="tokens['elderThing']['autofailAfter']" :disabled="tokens['elderThing']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -268,12 +279,12 @@
                 </tr>
                 <tr>
                     <td>Bless</td>
-                    <td><input v-model.number="tokens['bless'][0]" type="number" min="0" max="10"></td>
-                    <td><input v-model.number="tokens['bless'][1]" type="number" :disabled="tokens['bless'][4]"></td>
-                    <td><input v-model="tokens['bless'][2]" type="checkbox" :disabled="tokens['bless'][4]"></td>
-                    <td><input v-model="tokens['bless'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['bless']['count']" type="number" min="0" max="10"></td>
+                    <td><input v-model.number="tokens['bless']['value']" type="number" :disabled="tokens['bless']['autofail']"></td>
+                    <td><input v-model="tokens['bless']['redraw']" type="checkbox" :disabled="tokens['bless']['autofail']"></td>
+                    <td><input v-model="tokens['bless']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['bless'][3]" :disabled="tokens['bless'][4]">
+                        <select v-model="tokens['bless']['autofailAfter']" :disabled="tokens['bless']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -282,12 +293,12 @@
                 </tr>
                 <tr>
                     <td>Curse</td>
-                    <td><input v-model.number="tokens['curse'][0]" type="number" min="0" max="10"></td>
-                    <td><input v-model.number="tokens['curse'][1]" type="number" :disabled="tokens['curse'][4]"></td>
-                    <td><input v-model="tokens['curse'][2]" type="checkbox" :disabled="tokens['curse'][4]"></td>
-                    <td><input v-model="tokens['curse'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['curse']['count']" type="number" min="0" max="10"></td>
+                    <td><input v-model.number="tokens['curse']['value']" type="number" :disabled="tokens['curse']['autofail']"></td>
+                    <td><input v-model="tokens['curse']['redraw']" type="checkbox" :disabled="tokens['curse']['autofail']"></td>
+                    <td><input v-model="tokens['curse']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['curse'][3]" :disabled="tokens['curse'][4]">
+                        <select v-model="tokens['curse']['autofailAfter']" :disabled="tokens['curse']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -296,12 +307,12 @@
                 </tr>
                 <tr>
                     <td>Frost</td>
-                    <td><input v-model.number="tokens['frost'][0]" type="number" min="0" max="8"></td>
-                    <td><input v-model.number="tokens['frost'][1]" type="number" :disabled="tokens['frost'][4]"></td>
-                    <td><input v-model="tokens['frost'][2]" type="checkbox" :disabled="tokens['frost'][4]"></td>
-                    <td><input v-model="tokens['frost'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['frost']['count']" type="number" min="0" max="8"></td>
+                    <td><input v-model.number="tokens['frost']['value']" type="number" :disabled="tokens['frost']['autofail']"></td>
+                    <td><input v-model="tokens['frost']['redraw']" type="checkbox" :disabled="tokens['frost']['autofail']"></td>
+                    <td><input v-model="tokens['frost']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['frost'][3]" :disabled="tokens['frost'][4]">
+                        <select v-model="tokens['frost']['autofailAfter']" :disabled="tokens['frost']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -310,12 +321,12 @@
                 </tr>
                 <tr>
                     <td>Star</td>
-                    <td><input v-model.number="tokens['star'][0]" type="number" min="0" max="1"></td>
-                    <td><input v-model.number="tokens['star'][1]" type="number" :disabled="tokens['star'][4]"></td>
-                    <td><input v-model="tokens['star'][2]" type="checkbox" :disabled="tokens['star'][4]"></td>
-                    <td><input v-model="tokens['star'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['star']['count']" type="number" min="0" max="1"></td>
+                    <td><input v-model.number="tokens['star']['value']" type="number" :disabled="tokens['star']['autofail']"></td>
+                    <td><input v-model="tokens['star']['redraw']" type="checkbox" :disabled="tokens['star']['autofail']"></td>
+                    <td><input v-model="tokens['star']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['star'][3]" :disabled="tokens['star'][4]">
+                        <select v-model="tokens['star']['autofailAfter']" :disabled="tokens['star']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
@@ -324,12 +335,12 @@
                 </tr>
                 <tr>
                     <td>Autofail</td>
-                    <td><input v-model.number="tokens['autofail'][0]" type="number" min="0" max="1"></td>
-                    <td><input v-model.number="tokens['autofail'][1]" type="number" :disabled="tokens['autofail'][4]"></td>
-                    <td><input v-model="tokens['autofail'][2]" type="checkbox" :disabled="tokens['autofail'][4]"></td>
-                    <td><input v-model="tokens['autofail'][4]" type="checkbox"></td>
+                    <td><input v-model.number="tokens['autofail']['count']" type="number" min="0" max="1"></td>
+                    <td><input v-model.number="tokens['autofail']['value']" type="number" :disabled="tokens['autofail']['autofail']"></td>
+                    <td><input v-model="tokens['autofail']['redraw']" type="checkbox" :disabled="tokens['autofail']['autofail']"></td>
+                    <td><input v-model="tokens['autofail']['autofail']" type="checkbox"></td>
                     <td>
-                        <select v-model="tokens['autofail'][3]" :disabled="tokens['autofail'][4]">
+                        <select v-model="tokens['autofail']['autofailAfter']" :disabled="tokens['autofail']['autofail']">
                                     <option v-for="option in tokenOptions" v-bind:value="option.value">
                                         {{ option.text }}
                                       </option>
