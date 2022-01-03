@@ -45,6 +45,13 @@
         </div>
         <div class="block" v-if="whichBlock == 'settings'">
             <span>Redraw max: <input v-model.number="redraw_max" type="number"></span><br>
+            <span>How to resolve redraw over max: 
+                <select v-model="redrawHandling">
+                    <option v-for="option in redrawOptions" v-bind:value="option.value">
+                        {{ option.text }}
+                      </option>
+                </select>
+            </span>
         </div>
         <div class="block" v-else-if="whichBlock == 'tokens'">
             <h1 class="title">Token Configuration</h1>
