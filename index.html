@@ -13,6 +13,9 @@
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
+                    <a href="https://github.com/mgordin/mgordin.github.io" alt="Github Link" class="button is-light"><i class="fab fa-github"></i></a>
+                </div>
+                <div class="navbar-item">
                     <button class="button is-primary" v-on:click="getProbabilitiesMessage">Calculate probabilities</button>
                 </div>
             </div>
@@ -46,7 +49,7 @@
         </div>
         <div class="block" v-if="whichBlock == 'settings'">
             <h1 class="title is-4">Redraw handling</h1>
-            <p>With many "draw another token" tokens in the bag (e.g., Bless and Curse), calculating draw probabilities becomes very slow.  The setting below let you customize redraw handling - setting a max number of redraws to calculate, and how to resolve redraws past that max.  Clicking the "Plot redraw probabilities" button below will plot the probability of getting 1 - 10 redraws given your current token settings - i.e., what part of your overall token draw probability will be incorrect for a redraw max below your actual possible redraws.  This can help inform what you set "Redraw max" to.</p>
+            <p>With many "draw another token" tokens in the bag (e.g., Bless and Curse), calculating draw probabilities becomes very slow.  The settings below let you customize redraw handling - setting a max number of redraws to calculate, and how to resolve redraws past that max.  Clicking the "Plot redraw probabilities" button below will plot the probability of getting 1 - 10 redraws given your current token settings - i.e., what part of your overall token draw probability will be incorrect for a redraw max below your actual possible redraws.  This can help inform what you set "Redraw max" to.</p>
             <br>
             <div>Redraw max: <input v-model.number="redrawMax" type="number"></div>
             <div>How to resolve redraw over max: 
@@ -68,10 +71,10 @@
             <h1 class="title">Token Configuration</h1>
             <span>Use starting tokens from campaign:</span>
             <select @change="setCampaignTokens($event)">
-                        <option v-for="option in campaignOptions" v-bind:value="option.value">
-                            {{ option.text }}
-                        </option>
-                    </select>
+                <option v-for="option in campaignOptions" v-bind:value="option.value">
+                    {{ option.text }}
+                </option>
+            </select>
             <table class="table">
                 <tr>
                     <th>Token</th>
@@ -351,6 +354,7 @@
         </div>
         <div class="block" v-else-if="whichBlock == 'abilities'">
             <h1 class="title">Select abilities to be active</h1>
+            <p>You may select multiple abilities via CTRL+click or SHIFT+click.</p><br>
             <div class="select is-multiple">
                 <select v-model="abilitiesActive" multiple>
                         <option v-for="option in abilityOptions" v-bind:value="option.value">

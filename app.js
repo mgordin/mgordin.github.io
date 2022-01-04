@@ -419,12 +419,28 @@ var data = {
     ],
     abilitiesActive: [],
     abilityOptions: [
+        { text: 'Defiance (Skull)', value: 'DefianceSkull' },
+        { text: 'Defiance (Cultist)', value: 'DefianceCultist' },
+        { text: 'Defiance (Tablet)', value: 'DefianceTablet' },
+        { text: 'Defiance (Elder Thing)', value: 'DefianceElderThing' },
         { text: 'Defiance (2)', value: 'Defiance2XP' },
         { text: 'Jim Culver', value: 'JimCulver' },
         { text: 'Ritual Candles', value: 'RitualCandles1' },
         { text: 'Ritual Candles', value: 'RitualCandles2' }
     ],
     abilityEffects: {
+        "DefianceSkull": {
+            "skull": { "type": "s", "value": 0, "param": "noRedraw" }
+        },
+        "DefianceCultist": {
+            "cultist": { "type": "s", "value": 0, "param": "noRedraw" }
+        },
+        "DefianceTablet": {
+            "tablet": { "type": "s", "value": 0, "param": "noRedraw" }
+        },
+        "DefianceElderThing": {
+            "elderThing": { "type": "s", "value": 0, "param": "noRedraw" }
+        },
         "Defiance2XP": {
             "skull": { "type": "s", "value": 0, "param": "noRedraw" },
             "cultist": { "type": "s", "value": 0, "param": "noRedraw" },
